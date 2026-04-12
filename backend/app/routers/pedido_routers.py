@@ -36,7 +36,7 @@ def create_pedido(body: PedidoCreate, db: Session = Depends(get_db)):
 
 @route.get('/', response_model=list[PedidoRead])
 def read_pedidos(db: Session = Depends(get_db)):
-    pedidos = db.query(Pedido).all()
+    pedidos = db.query(Pedido).limit(100).all()
     return pedidos
 
 @route.get('/{id_pedido}', response_model=PedidoRead)

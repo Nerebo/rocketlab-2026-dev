@@ -21,4 +21,4 @@ class Pedido(Base):
     tempo_entrega_dias: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     tempo_entrega_estimado_dias: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     diferenca_entrega_dias: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    entrega_no_prazo: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    entrega_no_prazo: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)

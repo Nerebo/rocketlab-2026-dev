@@ -20,10 +20,17 @@ def create_avaliacao_pedido(body: AvaliacaoPedidoCreate, db: Session = Depends(g
     if db_avaliacao_pedido:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Avaliação do pedido já existe")
 
+    if not body.titulo_comentario:
+        body.titulo_comentario = 'Sem Titulo'
+
+    if not body.comentario:
+        body.comentario = 'Sem Comentário'
+
     db_avaliacao_pedido = AvaliacaoPedido(
         id_avaliacao_pedido=_avaliacao_pedido_id,
         id_pedido=body.id_pedido,
         nota=body.nota,
+        titulo=body.titulo_comentario,
         comentario=body.comentario
     )
 
