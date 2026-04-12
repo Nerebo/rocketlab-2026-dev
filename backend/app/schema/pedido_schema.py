@@ -10,7 +10,6 @@ class PedidoCreate(PedidoBase):
     pass
 
 class PedidoUpdate(PedidoBase):
-    id_consumidor: Optional[str] = Field(None, max_length=32)
     status: Optional[str] = Field(None, max_length=50)
     pedido_entregue_timestamp: Optional[datetime.datetime] = None
     data_estimada_entrega: Optional[datetime.date] = None

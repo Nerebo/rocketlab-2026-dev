@@ -9,17 +9,13 @@ from app.schema.consumidor_schema import ConsumidorCreate, ConsumidorUpdate, Con
 
 
 from app.service.utils import generate_id
+from app.models.pedido import Pedido
 
 route = APIRouter(prefix="/consumidor", tags=["consumidores"])
 
 @route.post('/', response_model=ConsumidorRead, status_code=status.HTTP_201_CREATED)
 def create_consumidor(body: ConsumidorCreate, db: Session = Depends(get_db)):
     _consumidor_id = generate_id()
-
-    db_consumidor = db.query(Consumidor).filter(Consumidor.id_consumidor == body.id_consumidor).first()
-
-    if db_consumidor:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Consumidor já existe")
 
     db_consumidor = Consumidor(
         id_consumidor=_consumidor_id,
@@ -66,6 +62,10 @@ def delete_consumidor(id_consumidor: str, db: Session = Depends(get_db)):
     if not consumidor:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Consumidor não encontrado")
     
+    avaliacoes = db.query(Pedido).filter(Pedido.id_consumidor == id_consumidor).all()
+    if avaliacoes:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Não é possível deletar um consumidor com pedidos associados")
+
     db.delete(consumidor)
     db.commit()
 

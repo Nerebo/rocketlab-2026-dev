@@ -14,16 +14,13 @@ route = APIRouter(prefix="/vendedores", tags=["vendedores"])
 def create_vendedor(body: VendedorCreate, db: Session = Depends(get_db)):
     _vendedor_id = generate_id()
 
-    db_vendedor = db.query(Vendedor).filter(Vendedor.id_vendedor == body.id_vendedor).first()
-
-
 
     db_vendedor = Vendedor(
         id_vendedor=_vendedor_id,
         nome_vendedor=body.nome_vendedor,
         prefixo_cep=body.prefixo_cep,
         cidade=body.cidade,
-        estado=body.estado
+        estado=body.estado.upper()
     )
 
 

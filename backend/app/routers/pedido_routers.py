@@ -1,14 +1,18 @@
+from sqlite3 import IntegrityError
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pytest import skip
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 
-from app.models import Pedido
+from app.models import Pedido, AvaliacaoPedido
 from app.schema.pedido_schema import PedidoCreate, PedidoUpdate, PedidoRead
 
 from app.service.utils import generate_id
 from datetime import datetime, date
+
+from app.models.consumidor import Consumidor
 
 status_permitidos = set(['entregue', 'faturado', 'enviado', 'em processamento', 'indisponível', 'cancelado', 'criado', 'aprovado'])
 
@@ -19,8 +23,10 @@ def create_pedido(body: PedidoCreate, db: Session = Depends(get_db)):
 
     db_pedido = db.query(Pedido).filter(Pedido.id_pedido == _pedido_id).first()
 
-    if db_pedido:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Pedido já existe")
+    db_consumidor = db.query(Consumidor).filter(Consumidor.id_consumidor == body.id_consumidor).first()
+
+    if not db_consumidor:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Consumidor não encontrado")
 
     db_pedido = Pedido(
         id_pedido=_pedido_id,
@@ -68,5 +74,10 @@ def delete_pedido(id_pedido: str, db: Session = Depends(get_db)):
     if not pedido:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido não encontrado")
 
+    avaliacoes = db.query(AvaliacaoPedido).filter(AvaliacaoPedido.id_pedido == id_pedido).all()
+    if avaliacoes:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Não é possível deletar um pedido que possui avaliações associadas")
+
     db.delete(pedido)
     db.commit()
+    return None

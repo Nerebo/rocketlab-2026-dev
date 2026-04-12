@@ -8,6 +8,7 @@ from app.models import AvaliacaoPedido
 from app.schema.avaliacao_pedido_schema import AvaliacaoPedidoCreate, AvaliacaoPedidoUpdate, AvaliacaoPedidoRead
 
 from app.service.utils import generate_id
+from app.models.pedido import Pedido
 
 route = APIRouter(prefix="/avaliacao_pedidos", tags=["avaliacao_pedidos"])
 
@@ -15,10 +16,10 @@ route = APIRouter(prefix="/avaliacao_pedidos", tags=["avaliacao_pedidos"])
 def create_avaliacao_pedido(body: AvaliacaoPedidoCreate, db: Session = Depends(get_db)):
     _avaliacao_pedido_id = generate_id()
 
-    db_avaliacao_pedido = db.query(AvaliacaoPedido).filter(AvaliacaoPedido.id_avaliacao_pedido == _avaliacao_pedido_id).first()
+    pedido = db.query(Pedido).filter(Pedido.id_pedido == body.id_pedido).first()
 
-    if db_avaliacao_pedido:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Avaliação do pedido já existe")
+    if not pedido:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido avaliado não existe")
 
     if not body.titulo_comentario:
         body.titulo_comentario = 'Sem Titulo'
@@ -27,10 +28,10 @@ def create_avaliacao_pedido(body: AvaliacaoPedidoCreate, db: Session = Depends(g
         body.comentario = 'Sem Comentário'
 
     db_avaliacao_pedido = AvaliacaoPedido(
-        id_avaliacao_pedido=_avaliacao_pedido_id,
+        id_avaliacao=_avaliacao_pedido_id,
         id_pedido=body.id_pedido,
-        nota=body.nota,
-        titulo=body.titulo_comentario,
+        avaliacao=body.avaliacao,
+        titulo_comentario=body.titulo_comentario,
         comentario=body.comentario
     )
 
@@ -46,16 +47,23 @@ def read_avaliacao_pedidos(db: Session = Depends(get_db)):
 
 @route.get('/{id_avaliacao_pedido}', response_model=AvaliacaoPedidoRead)
 def read_avaliacao_pedido(id_avaliacao_pedido: str, db: Session = Depends(get_db)):
-    avaliacao_pedido = db.query(AvaliacaoPedido).filter(AvaliacaoPedido.id_avaliacao_pedido == id_avaliacao_pedido).first()
+    avaliacao_pedido = db.query(AvaliacaoPedido).filter(AvaliacaoPedido.id_avaliacao == id_avaliacao_pedido).first()
     if not avaliacao_pedido:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Avaliação do pedido não encontrada")
     return avaliacao_pedido
 
 @route.patch('/{id_avaliacao_pedido}', response_model=AvaliacaoPedidoRead)
 def update_avaliacao_pedido(id_avaliacao_pedido: str, body: AvaliacaoPedidoUpdate, db: Session = Depends(get_db)):
-    avaliacao_pedido = db.query(AvaliacaoPedido).filter(AvaliacaoPedido.id_avaliacao_pedido == id_avaliacao_pedido).first()
+    avaliacao_pedido = db.query(AvaliacaoPedido).filter(AvaliacaoPedido.id_avaliacao == id_avaliacao_pedido).first()
+
+
     if not avaliacao_pedido:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Avaliação do pedido não encontrada")
+
+    pedido = db.query(Pedido).filter(Pedido.id_pedido == avaliacao_pedido.id_pedido).first()
+
+    if not pedido:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido avaliado não existe")
 
     for key, value in body.model_dump(exclude_unset=True).items():
         setattr(avaliacao_pedido, key, value)

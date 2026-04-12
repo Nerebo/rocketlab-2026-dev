@@ -11,8 +11,9 @@ class AvaliacaoPedidoCreate(AvaliacaoPedidoBase):
     pass
 
 class AvaliacaoPedidoUpdate(BaseModel):
-    id_pedido: Optional[str] = Field(None, min_length=1, max_length=32)
     avaliacao: Optional[int] = Field(None, ge=1, le=5)
+    titulo_comentario: Optional[str] = Field(None, min_length=1, max_length=255)
+    comentario: Optional[str] = Field(None, min_length=1, max_length=1000)
 
 class AvaliacaoPedidoRead(AvaliacaoPedidoBase):
     id_avaliacao: str

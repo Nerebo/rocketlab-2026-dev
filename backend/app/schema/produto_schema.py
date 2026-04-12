@@ -12,10 +12,11 @@ class ProdutoBase(BaseModel):
 class ProdutoCreate(ProdutoBase):
     pass
 
-class ProdutoUpdate(BaseModel):
-    nome_produto: Optional[str] = Field(None, min_length=1, max_length=255)
-    categoria_produto: Optional[str] = Field(None, min_length=1, max_length=100)
+class ProdutoUpdate(ProdutoBase):
+    pass
 
 class ProdutoRead(ProdutoBase):
     id_produto: str
     model_config = ConfigDict(from_attributes=True)
+    categoria_produto: str = Field(..., min_length=0, max_length=100)
+    peso_produto_gramas: Optional[float] = Field(None)

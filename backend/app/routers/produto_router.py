@@ -14,16 +14,14 @@ route = APIRouter(prefix="/produtos", tags=["produtos"])
 def create_produto(body: ProdutoCreate, db: Session = Depends(get_db)):
     _produto_id = generate_id()
 
-    if db.query(Produto).filter(Produto.id_produto == body.id_produto).first():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Produto já existe")
-
     db_produto = Produto(
         id_produto=_produto_id,
         nome_produto=body.nome_produto,
-        descricao=body.descricao,
-        preco_BRL=body.preco_BRL,
-        peso_kg=body.peso_kg,
-        categoria=body.categoria
+        peso_produto_gramas=body.peso_produto_gramas,
+        comprimento_centimetros=body.comprimento_centimetros,
+        altura_centimetros=body.altura_centimetros,
+        largura_centimetros=body.largura_centimetros,
+        categoria_produto=body.categoria_produto
     )
 
     db.add(db_produto)
