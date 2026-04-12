@@ -1,4 +1,10 @@
 from fastapi import FastAPI
+from app.routers.vendedor_router import route as vendedor_route
+from app.routers.produto_router import route as produto_route
+from app.routers.pedido_routers import route as pedido_route
+from app.routers.item_pedido_router import router as item_pedido_route
+from app.routers.consumidor_router import route as consumidor_route
+from app.routers.avaliacao_pedido_router import route as avaliacao_pedido_route 
 
 app = FastAPI(
     title="Sistema de Compras Online",
@@ -6,6 +12,12 @@ app = FastAPI(
     version="1.0.0",
 )
 
+app.include_router(vendedor_route)
+app.include_router(produto_route)
+app.include_router(pedido_route)
+app.include_router(item_pedido_route)
+app.include_router(consumidor_route)
+app.include_router(avaliacao_pedido_route)
 
 @app.get("/", tags=["Health"])
 def health_check():

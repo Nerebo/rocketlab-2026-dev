@@ -19,3 +19,4 @@ class AvaliacaoPedido(Base):
     comentario: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
     data_comentario: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     data_resposta: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
