@@ -20,8 +20,7 @@ def create_consumidor(body: ConsumidorCreate, db: Session = Depends(get_db)):
     db_consumidor = Consumidor(
         id_consumidor=_consumidor_id,
         nome_consumidor=body.nome_consumidor,
-        email=body.email,
-        cep=body.cep,
+        prefixo_cep=body.prefixo_cep,
         cidade=body.cidade,
         estado=body.estado.upper()
     )
@@ -48,6 +47,9 @@ def update_consumidor(id_consumidor: str, body: ConsumidorUpdate, db: Session = 
     consumidor = db.query(Consumidor).filter(Consumidor.id_consumidor == id_consumidor).first()
     if not consumidor:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Consumidor não encontrado")
+
+    if body.estado:
+        body.estado = body.estado.upper()
 
     for key, value in body.model_dump(exclude_unset=True).items():
         setattr(consumidor, key, value)

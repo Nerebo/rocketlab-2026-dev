@@ -45,16 +45,16 @@ def read_avaliacao_pedidos(db: Session = Depends(get_db)):
     avaliacao_pedidos = db.query(AvaliacaoPedido).all()
     return avaliacao_pedidos
 
-@route.get('/{id_avaliacao_pedido}', response_model=AvaliacaoPedidoRead)
-def read_avaliacao_pedido(id_avaliacao_pedido: str, db: Session = Depends(get_db)):
-    avaliacao_pedido = db.query(AvaliacaoPedido).filter(AvaliacaoPedido.id_avaliacao == id_avaliacao_pedido).first()
+@route.get('/{id_avaliacao}', response_model=AvaliacaoPedidoRead)
+def read_avaliacao_pedido(id_avaliacao: str, db: Session = Depends(get_db)):
+    avaliacao_pedido = db.query(AvaliacaoPedido).filter(AvaliacaoPedido.id_avaliacao == id_avaliacao).first()
     if not avaliacao_pedido:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Avaliação do pedido não encontrada")
     return avaliacao_pedido
 
-@route.patch('/{id_avaliacao_pedido}', response_model=AvaliacaoPedidoRead)
-def update_avaliacao_pedido(id_avaliacao_pedido: str, body: AvaliacaoPedidoUpdate, db: Session = Depends(get_db)):
-    avaliacao_pedido = db.query(AvaliacaoPedido).filter(AvaliacaoPedido.id_avaliacao == id_avaliacao_pedido).first()
+@route.patch('/{id_avaliacao}', response_model=AvaliacaoPedidoRead)
+def update_avaliacao_pedido(id_avaliacao: str, body: AvaliacaoPedidoUpdate, db: Session = Depends(get_db)):
+    avaliacao_pedido = db.query(AvaliacaoPedido).filter(AvaliacaoPedido.id_avaliacao == id_avaliacao).first()
 
 
     if not avaliacao_pedido:
@@ -72,9 +72,9 @@ def update_avaliacao_pedido(id_avaliacao_pedido: str, body: AvaliacaoPedidoUpdat
     db.refresh(avaliacao_pedido)
     return avaliacao_pedido
 
-@route.delete('/{id_avaliacao_pedido}', status_code=status.HTTP_204_NO_CONTENT)
-def delete_avaliacao_pedido(id_avaliacao_pedido: str, db: Session = Depends(get_db)):
-    avaliacao_pedido = db.query(AvaliacaoPedido).filter(AvaliacaoPedido.id_avaliacao_pedido == id_avaliacao_pedido).first()
+@route.delete('/{id_avaliacao}', status_code=status.HTTP_204_NO_CONTENT)
+def delete_avaliacao_pedido(id_avaliacao: str, db: Session = Depends(get_db)):
+    avaliacao_pedido = db.query(AvaliacaoPedido).filter(AvaliacaoPedido.id_avaliacao == id_avaliacao).first()
     if not avaliacao_pedido:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Avaliação do pedido não encontrada")
 

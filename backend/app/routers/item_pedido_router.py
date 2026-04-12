@@ -15,10 +15,10 @@ def create_item_pedido(item_pedido: ItemPedidoCreate, db: Session = Depends(get_
     db_item_pedido = ItemPedido(**item_pedido.model_dump())
 
     if not db.query(Produto).filter(Produto.id_produto == db_item_pedido.id_produto).first():
-        raise HTTPException(status_code=404, detail="Não existe um produto cadastrado com ID especificado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Não existe um produto cadastrado com ID especificado")
 
     if not db.query(Vendedor).filter(Vendedor.id_vendedor == db_item_pedido.id_vendedor).first():
-        raise HTTPException(status_code=404, detail="Não existe um vendedor cadastrado com ID especificado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Não existe um vendedor cadastrado com ID especificado")
 
     db.add(db_item_pedido)
     db.commit()
@@ -33,20 +33,20 @@ def read_item_pedidos(db: Session = Depends(get_db)):
 def read_item_pedido(id_pedido: str, id_item: int, db: Session = Depends(get_db)):
     db_item_pedido = db.query(ItemPedido).filter(ItemPedido.id_pedido == id_pedido, ItemPedido.id_item == id_item).first()
     if db_item_pedido is None:
-        raise HTTPException(status_code=404, detail="ItemPedido not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ItemPedido not found")
     return db_item_pedido
 
 @router.patch("/{id_pedido}/{id_item}", response_model=ItemPedidoRead)
 def update_item_pedido(id_pedido: str, id_item: int, item_pedido: ItemPedidoUpdate, db: Session = Depends(get_db)):
     db_item_pedido = db.query(ItemPedido).filter(ItemPedido.id_pedido == id_pedido, ItemPedido.id_item == id_item).first()
     if db_item_pedido is None:
-        raise HTTPException(status_code=404, detail="ItemPedido not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ItemPedido not found")
     
     if not db.query(Produto).filter(Produto.id_produto == db_item_pedido.id_produto).first():
-        raise HTTPException(status_code=404, detail="Não existe um produto cadastrado com ID especificado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Não existe um produto cadastrado com ID especificado")
 
     if not db.query(Vendedor).filter(Vendedor.id_vendedor == db_item_pedido.id_vendedor).first():
-        raise HTTPException(status_code=404, detail="Não existe um vendedor cadastrado com ID especificado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Não existe um vendedor cadastrado com ID especificado")
 
     for key, value in item_pedido.model_dump(exclude_unset=True).items():
         setattr(db_item_pedido, key, value)
@@ -56,7 +56,7 @@ def update_item_pedido(id_pedido: str, id_item: int, item_pedido: ItemPedidoUpda
 
 @router.delete("/{id_pedido}/{id_item}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_item_pedido(id_pedido: str, id_item: int, db: Session = Depends(get_db)):
-    db_item_pedido = db.query(ItemPedido).filter(ItemPedido.id_pedido == id_pedido, ItemPedido.id == id_item).first()
+    db_item_pedido = db.query(ItemPedido).filter(ItemPedido.id_pedido == id_pedido, ItemPedido.id_item == id_item).first()
     if db_item_pedido is None:
         raise HTTPException(status_code=404, detail="ItemPedido not found")
     db.delete(db_item_pedido)

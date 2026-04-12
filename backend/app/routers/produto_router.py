@@ -10,7 +10,7 @@ from app.service.utils import generate_id
 
 route = APIRouter(prefix="/produtos", tags=["produtos"])
 
-@route.post('/', response_model=ProdutoCreate, status_code=status.HTTP_201_CREATED)
+@route.post('/', response_model=ProdutoRead, status_code=status.HTTP_201_CREATED)
 def create_produto(body: ProdutoCreate, db: Session = Depends(get_db)):
     _produto_id = generate_id()
 
@@ -34,7 +34,14 @@ def read_produtos(db: Session = Depends(get_db)):
     produtos = db.query(Produto).all()
     return produtos
 
-@route.get('/{nome}', response_model=list[ProdutoRead])
+@route.get('/{id_produto}', response_model=ProdutoRead)
+def read_produto_by_id(id_produto: str, db: Session = Depends(get_db)):
+    produto = db.query(Produto).filter(Produto.id_produto == id_produto).first()
+    if not produto:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
+    return produto
+
+@route.get('/buscar/{nome}', response_model=list[ProdutoRead])
 def read_produto(nome: str, db: Session = Depends(get_db)):
     produto = db.query(Produto).filter(Produto.nome_produto.ilike(f"%{nome}%")).all()
     if not produto:

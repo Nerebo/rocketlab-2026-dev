@@ -10,7 +10,7 @@ from app.service.utils import generate_id
 
 route = APIRouter(prefix="/vendedores", tags=["vendedores"])
 
-@route.post('/', response_model=VendedorCreate, status_code=status.HTTP_201_CREATED)
+@route.post('/', response_model=VendedorRead, status_code=status.HTTP_201_CREATED)
 def create_vendedor(body: VendedorCreate, db: Session = Depends(get_db)):
     _vendedor_id = generate_id()
 
@@ -46,6 +46,9 @@ def update_vendedor(id_vendedor: str, body: VendedorUpdate, db: Session = Depend
     vendedor = db.query(Vendedor).filter(Vendedor.id_vendedor == id_vendedor).first()
     if not vendedor:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vendedor não encontrado")
+
+    if body.estado:
+        body.estado = body.estado.upper()
 
     for key, value in body.model_dump(exclude_unset=True).items():
         setattr(vendedor, key, value)
