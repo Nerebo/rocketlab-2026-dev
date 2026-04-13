@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.routers.vendedor_router import route as vendedor_route
 from app.routers.produto_router import route as produto_route
 from app.routers.pedido_routers import route as pedido_route
@@ -10,6 +11,15 @@ app = FastAPI(
     title="Sistema de Compras Online",
     description="API para gerenciamento de pedidos, produtos, consumidores e vendedores.",
     version="1.0.0",
+)
+
+# Configurar CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Em produção, especifique os domínios permitidos
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(vendedor_route)
