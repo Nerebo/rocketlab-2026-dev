@@ -1,6 +1,6 @@
 from sqlite3 import IntegrityError
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pytest import skip
 from sqlalchemy.orm import Session
 
@@ -8,6 +8,7 @@ from app.database import get_db
 
 from app.models import Pedido, AvaliacaoPedido
 from app.schema.pedido_schema import PedidoCreate, PedidoUpdate, PedidoRead
+from app.schema.pagination_schema import PaginatedResponse, calculate_pagination
 
 from app.service.utils import generate_id
 from datetime import datetime, date
@@ -40,10 +41,19 @@ def create_pedido(body: PedidoCreate, db: Session = Depends(get_db)):
     db.refresh(db_pedido)
     return db_pedido
 
-@route.get('/', response_model=list[PedidoRead])
-def read_pedidos(db: Session = Depends(get_db)):
-    pedidos = db.query(Pedido).limit(100).all()
-    return pedidos
+@route.get('/', response_model=PaginatedResponse[PedidoRead])
+def read_pedidos(
+    skip: int = Query(0, ge=0, description="Items a pular"),
+    limit: int = Query(10, ge=1, le=100, description="Items por página"),
+    db: Session = Depends(get_db)
+):
+    total = db.query(Pedido).count()
+    pedidos = db.query(Pedido).offset(skip).limit(limit).all()
+    pagination_info = calculate_pagination(total, skip, limit)
+    return PaginatedResponse(
+        data=pedidos,
+        **pagination_info
+    )
 
 @route.get('/{id_pedido}', response_model=PedidoRead)
 def read_pedido(id_pedido: str, db: Session = Depends(get_db)):

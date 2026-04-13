@@ -38,7 +38,7 @@ class TestVendedorRouter:
         
         response = client.get("/vendedores/")
         assert response.status_code == 200
-        assert len(response.json()) == 3
+        assert len(response.json()['data']) == 3
     
     def test_buscar_vendedor_por_nome(self, client: TestClient):
         """Validar busca de vendedor por nome (case-insensitive)"""

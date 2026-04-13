@@ -116,7 +116,7 @@ class TestAvaliacaoPedidoRouter:
         
         response = client.get("/avaliacao_pedidos/")
         assert response.status_code == 200
-        assert len(response.json()) == 3
+        assert len(response.json()['data']) == 3
     
     def test_buscar_avaliacao_por_id(self, client: TestClient, pedido_valido: str):
         """Validar busca de avaliação pelo ID"""

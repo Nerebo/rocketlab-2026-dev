@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pytest import skip
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import ItemPedido
 from app.schema.item_pedido_schema import ItemPedidoCreate, ItemPedidoUpdate, ItemPedidoRead
+from app.schema.pagination_schema import PaginatedResponse, calculate_pagination
 from app.models.produto import Produto 
 from app.models.vendedor import Vendedor
 
@@ -25,9 +26,19 @@ def create_item_pedido(item_pedido: ItemPedidoCreate, db: Session = Depends(get_
     db.refresh(db_item_pedido)
     return db_item_pedido
 
-@router.get("/", response_model=list[ItemPedidoRead])
-def read_item_pedidos(db: Session = Depends(get_db)):
-    return db.query(ItemPedido).all()
+@router.get("/", response_model=PaginatedResponse[ItemPedidoRead])
+def read_item_pedidos(
+    skip: int = Query(0, ge=0, description="Items a pular"),
+    limit: int = Query(10, ge=1, le=100, description="Items por página"),
+    db: Session = Depends(get_db)
+):
+    total = db.query(ItemPedido).count()
+    items = db.query(ItemPedido).offset(skip).limit(limit).all()
+    pagination_info = calculate_pagination(total, skip, limit)
+    return PaginatedResponse(
+        data=items,
+        **pagination_info
+    )
 
 @router.get("/{id_pedido}/{id_item}", response_model=ItemPedidoRead)
 def read_item_pedido(id_pedido: str, id_item: int, db: Session = Depends(get_db)):

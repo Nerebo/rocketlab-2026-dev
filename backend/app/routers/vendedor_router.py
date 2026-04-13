@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pytest import skip
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Vendedor
 from app.schema.vendedor_schema import VendedorCreate, VendedorUpdate, VendedorRead
+from app.schema.pagination_schema import PaginatedResponse, calculate_pagination
 
 from app.service.utils import generate_id
 
@@ -29,10 +30,19 @@ def create_vendedor(body: VendedorCreate, db: Session = Depends(get_db)):
     db.refresh(db_vendedor)
     return db_vendedor
 
-@route.get('/', response_model=list[VendedorRead])
-def read_vendedores(db: Session = Depends(get_db)):
-    vendedores = db.query(Vendedor).all()
-    return vendedores
+@route.get('/', response_model=PaginatedResponse[VendedorRead])
+def read_vendedores(
+    skip: int = Query(0, ge=0, description="Items a pular"),
+    limit: int = Query(10, ge=1, le=100, description="Items por página"),
+    db: Session = Depends(get_db)
+):
+    total = db.query(Vendedor).count()
+    vendedores = db.query(Vendedor).offset(skip).limit(limit).all()
+    pagination_info = calculate_pagination(total, skip, limit)
+    return PaginatedResponse(
+        data=vendedores,
+        **pagination_info
+    )
 
 @route.get('/{nome}', response_model=list[VendedorRead])
 def read_vendedor(nome: str, db: Session = Depends(get_db)):

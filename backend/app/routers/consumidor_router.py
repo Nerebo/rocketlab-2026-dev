@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pytest import skip
 from sqlalchemy.orm import Session
 
@@ -6,6 +6,7 @@ from app.database import get_db
 
 from app.models import Consumidor
 from app.schema.consumidor_schema import ConsumidorCreate, ConsumidorUpdate, ConsumidorRead
+from app.schema.pagination_schema import PaginatedResponse, calculate_pagination
 
 
 from app.service.utils import generate_id
@@ -30,10 +31,19 @@ def create_consumidor(body: ConsumidorCreate, db: Session = Depends(get_db)):
     db.refresh(db_consumidor)
     return db_consumidor
 
-@route.get('/', response_model=list[ConsumidorRead])
-def read_consumidores(db: Session = Depends(get_db)):
-    consumidores = db.query(Consumidor).all()
-    return consumidores
+@route.get('/', response_model=PaginatedResponse[ConsumidorRead])
+def read_consumidores(
+    skip: int = Query(0, ge=0, description="Items a pular"),
+    limit: int = Query(10, ge=1, le=100, description="Items por página"),
+    db: Session = Depends(get_db)
+):
+    total = db.query(Consumidor).count()
+    consumidores = db.query(Consumidor).offset(skip).limit(limit).all()
+    pagination_info = calculate_pagination(total, skip, limit)
+    return PaginatedResponse(
+        data=consumidores,
+        **pagination_info
+    )
 
 @route.get('/{nome}', response_model=list[ConsumidorRead])
 def read_consumidor(nome: str, db: Session = Depends(get_db)):

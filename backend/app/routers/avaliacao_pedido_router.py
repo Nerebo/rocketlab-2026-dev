@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pytest import skip
 from sqlalchemy.orm import Session
 
@@ -6,6 +6,7 @@ from app.database import get_db
 
 from app.models import AvaliacaoPedido
 from app.schema.avaliacao_pedido_schema import AvaliacaoPedidoCreate, AvaliacaoPedidoUpdate, AvaliacaoPedidoRead
+from app.schema.pagination_schema import PaginatedResponse, calculate_pagination
 
 from app.service.utils import generate_id
 from app.models.pedido import Pedido
@@ -40,10 +41,19 @@ def create_avaliacao_pedido(body: AvaliacaoPedidoCreate, db: Session = Depends(g
     db.refresh(db_avaliacao_pedido)
     return db_avaliacao_pedido
 
-@route.get('/', response_model=list[AvaliacaoPedidoRead])
-def read_avaliacao_pedidos(db: Session = Depends(get_db)):
-    avaliacao_pedidos = db.query(AvaliacaoPedido).all()
-    return avaliacao_pedidos
+@route.get('/', response_model=PaginatedResponse[AvaliacaoPedidoRead])
+def read_avaliacao_pedidos(
+    skip: int = Query(0, ge=0, description="Items a pular"),
+    limit: int = Query(10, ge=1, le=100, description="Items por página"),
+    db: Session = Depends(get_db)
+):
+    total = db.query(AvaliacaoPedido).count()
+    avaliacao_pedidos = db.query(AvaliacaoPedido).offset(skip).limit(limit).all()
+    pagination_info = calculate_pagination(total, skip, limit)
+    return PaginatedResponse(
+        data=avaliacao_pedidos,
+        **pagination_info
+    )
 
 @route.get('/{id_avaliacao}', response_model=AvaliacaoPedidoRead)
 def read_avaliacao_pedido(id_avaliacao: str, db: Session = Depends(get_db)):

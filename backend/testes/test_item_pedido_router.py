@@ -129,7 +129,7 @@ class TestItemPedidoRouter:
         
         response = client.get("/item_pedido/")
         assert response.status_code == 200
-        assert len(response.json()) == 3
+        assert len(response.json()['data']) == 3
     
     def test_buscar_item_pedido_por_id_composto(self, client: TestClient, pedido_valido: str, 
                                                 produto_valido: str, vendedor_valido: str):

@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pytest import skip
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Produto
 from app.schema.produto_schema import ProdutoCreate, ProdutoUpdate, ProdutoRead
+from app.schema.pagination_schema import PaginatedResponse, calculate_pagination
 
 from app.service.utils import generate_id
 
@@ -29,10 +30,19 @@ def create_produto(body: ProdutoCreate, db: Session = Depends(get_db)):
     db.refresh(db_produto)
     return db_produto
 
-@route.get('/', response_model=list[ProdutoRead])
-def read_produtos(db: Session = Depends(get_db)):
-    produtos = db.query(Produto).all()
-    return produtos
+@route.get('/', response_model=PaginatedResponse[ProdutoRead])
+def read_produtos(
+    skip: int = Query(0, ge=0, description="Items a pular"),
+    limit: int = Query(10, ge=1, le=100, description="Items por página"),
+    db: Session = Depends(get_db)
+    ):
+    total = db.query(Produto).count()
+    produtos = db.query(Produto).offset(skip).limit(limit).all()
+    pagination_info = calculate_pagination(total, skip, limit)
+    return PaginatedResponse(
+        data=produtos,
+        **pagination_info
+    )
 
 @route.get('/{id_produto}', response_model=ProdutoRead)
 def read_produto_by_id(id_produto: str, db: Session = Depends(get_db)):
