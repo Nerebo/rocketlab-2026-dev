@@ -58,7 +58,7 @@ Crie um arquivo `.env` na raiz do backend (opcional, usa SQLite por padrão):
 DATABASE_URL=sqlite:///./database.db
 ```
 
-### 4️⃣ Inicializar o Banco de Dados
+### 4️⃣ Inicializar o Banco de Dados e Populando
 
 ```bash
 alembic upgrade head
@@ -66,7 +66,14 @@ alembic upgrade head
 
 Isso aplicará todas as migrations e criará as tabelas necessárias.
 
-### 5️⃣ Rodar o Servidor
+
+Após o comando anterior, no diretório backend rode o seguinte comando para popular o banco
+```bash
+python -m app.service.ingest.py
+```
+
+
+### 5️⃣ rodar o Servidor`
 
 ```bash
 python -m uvicorn app.main:app --reload
