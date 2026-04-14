@@ -104,13 +104,20 @@ function App() {
 
   // View product detail
   const handleViewProduct = useCallback((id: string) => {
-    const product = produtos.find((p) => p.id_produto === id);
-    if (product) {
-      setSelectedProduct(product);
-      setEditingProduct(null);
-      setShowDetail(true);
-    }
-  }, [produtos]);
+    setIsLoading(true);
+    produtoService.obterProdutoPorId(id)
+      .then((product) => {
+        setSelectedProduct(product);
+        setEditingProduct(null);
+        setShowDetail(true);
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : 'Erro ao carregar produto');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   // Edit product
   const handleEditProduct = useCallback((id: string) => {
@@ -197,7 +204,7 @@ function App() {
       <header className="bg-primary-800 border-b border-primary-700 sticky top-0 z-40">
         <div className="container-max py-6">
           <div className="flex items-center justify-between gap-4 mb-6">
-            <h1 className="text-3xl font-serif">🚀 RocketLab Marketplace</h1>
+            <h1 className="text-3xl font-serif">🚀 Rocket Ship</h1>
             <Button onClick={() => setShowForm(true)} variant="primary">
               ➕ Novo Produto
             </Button>

@@ -149,6 +149,38 @@ export function ProdutoDetalhe({ produto, onVoltar }: ProdutoDetalheProps) {
               )}
             </div>
 
+            {/* Preço e Vendas */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '16px',
+              marginBottom: '24px',
+              paddingBottom: '24px',
+              borderBottom: '1px solid #e0e0e0'
+            }}>
+              {produto.preco_medio !== undefined && produto.preco_medio !== null && (
+                <div style={{ padding: '12px', backgroundColor: '#f9f9f9', borderRadius: '6px' }}>
+                  <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#888', fontWeight: '600', textTransform: 'uppercase' }}>
+                    Preço Médio
+                  </p>
+                  <p style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: '#667eea' }}>
+                    R$ {produto.preco_medio.toFixed(2)}
+                  </p>
+                </div>
+              )}
+              
+              {produto.numero_vendas !== undefined && produto.numero_vendas !== null && (
+                <div style={{ padding: '12px', backgroundColor: '#f9f9f9', borderRadius: '6px' }}>
+                  <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#888', fontWeight: '600', textTransform: 'uppercase' }}>
+                    Número de Vendas
+                  </p>
+                  <p style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: '#667eea' }}>
+                    {produto.numero_vendas} {produto.numero_vendas === 1 ? 'venda' : 'vendas'}
+                  </p>
+                </div>
+              )}
+            </div>
+
             {/* Especificações */}
             <div style={{ marginBottom: '24px' }}>
               <h3 style={{

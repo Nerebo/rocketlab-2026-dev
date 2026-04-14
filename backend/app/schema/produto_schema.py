@@ -27,6 +27,8 @@ class ProdutoRead(ProdutoBase):
     id_produto: str
     link_imagem: Optional[str] = Field(None, max_length=500)
     media_avaliacoes: Optional[float] = None
+    preco_medio: Optional[float] = None
+    numero_vendas: Optional[int] = None
     model_config = ConfigDict(from_attributes=True)
     categoria_produto: str = Field(..., min_length=0, max_length=100)
     peso_produto_gramas: Optional[float] = Field(None)

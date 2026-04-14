@@ -12,6 +12,8 @@ export interface Produto {
   media?: number;
   media_avaliacao?: number;
   total_avaliacoes?: number;
+  preco_medio?: number;
+  numero_vendas?: number;
 }
 
 export interface PaginatedResponse {

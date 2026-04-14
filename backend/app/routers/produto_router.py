@@ -269,7 +269,32 @@ def read_produto_by_id(id_produto: str, db: Session = Depends(get_db)):
     produto = db.query(Produto).filter(Produto.id_produto == id_produto).first()
     if not produto:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
-    return produto
+    
+    # Calcular preço médio e número de vendas
+    preco_info = db.query(
+        func.avg(ItemPedido.preco_BRL).label('preco_medio'),
+        func.count(ItemPedido.id_item).label('numero_vendas')
+    ).filter(ItemPedido.id_produto == id_produto).first()
+    
+    preco_medio = round(float(preco_info[0]), 2) if preco_info and preco_info[0] else None
+    numero_vendas = preco_info[1] if preco_info else 0
+    
+    # Converter para dicionário e adicionar os novos campos
+    produto_dict = {
+        'id_produto': produto.id_produto,
+        'nome_produto': produto.nome_produto,
+        'categoria_produto': produto.categoria_produto,
+        'peso_produto_gramas': produto.peso_produto_gramas,
+        'comprimento_centimetros': produto.comprimento_centimetros,
+        'altura_centimetros': produto.altura_centimetros,
+        'largura_centimetros': produto.largura_centimetros,
+        'link_imagem': produto.link_imagem,
+        'media_avaliacoes': produto.media_avaliacoes,
+        'preco_medio': preco_medio,
+        'numero_vendas': numero_vendas
+    }
+    
+    return produto_dict
 
 @route.patch('/{id_produto}', response_model=ProdutoRead)
 def update_produto(id_produto: str, body: ProdutoUpdate, db: Session = Depends(get_db)):

@@ -15,6 +15,8 @@ interface Produto {
   comprimento_centimetros?: number;
   altura_centimetros?: number;
   largura_centimetros?: number;
+  preco_medio?: number;
+  numero_vendas?: number;
 }
 
 interface Review {
@@ -130,6 +132,36 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
               </div>
 
               {error && <ErrorMessage message={error} />}
+
+              {/* Preço e Vendas */}
+              {(product.preco_medio !== undefined || product.numero_vendas !== undefined) && (
+                <div className="p-6 bg-gradient-to-br from-primary-700 to-primary-800 rounded-xl border border-primary-600 hover:border-primary-500 transition-colors">
+                  <h3 className="text-lg font-bold text-primary-50 mb-4 flex items-center gap-2">
+                    <span className="text-2xl">💰</span>
+                    Informações de Venda
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {product.preco_medio !== undefined && product.preco_medio !== null && (
+                      <div className="flex items-start gap-3 p-3 bg-primary-800 rounded-lg border border-primary-600">
+                        <span className="text-2xl">💵</span>
+                        <div>
+                          <p className="text-primary-300 font-semibold text-sm">Preço Médio</p>
+                          <p className="text-primary-50 font-bold text-lg">R$ {product.preco_medio.toFixed(2)}</p>
+                        </div>
+                      </div>
+                    )}
+                    {product.numero_vendas !== undefined && product.numero_vendas !== null && (
+                      <div className="flex items-start gap-3 p-3 bg-primary-800 rounded-lg border border-primary-600">
+                        <span className="text-2xl">📊</span>
+                        <div>
+                          <p className="text-primary-300 font-semibold text-sm">Número de Vendas</p>
+                          <p className="text-primary-50 font-bold text-lg">{product.numero_vendas} {product.numero_vendas === 1 ? 'venda' : 'vendas'}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Especificações */}
               {(product.peso_produto_gramas || product.comprimento_centimetros || product.altura_centimetros || product.largura_centimetros) && (
