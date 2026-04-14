@@ -16,4 +16,6 @@ class Produto(Base):
     comprimento_centimetros: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     altura_centimetros: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     largura_centimetros: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    link_imagem: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    media_avaliacoes: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 

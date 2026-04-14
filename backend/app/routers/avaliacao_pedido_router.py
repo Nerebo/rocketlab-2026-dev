@@ -4,14 +4,20 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 
-from app.models import AvaliacaoPedido
+from app.models import AvaliacaoPedido, ItemPedido
 from app.schema.avaliacao_pedido_schema import AvaliacaoPedidoCreate, AvaliacaoPedidoUpdate, AvaliacaoPedidoRead
 from app.schema.pagination_schema import PaginatedResponse, calculate_pagination
 
-from app.service.utils import generate_id
+from app.service.utils import generate_id, calcular_media_avaliacoes, calcular_media_avaliacoes_produto
 from app.models.pedido import Pedido
 
 route = APIRouter(prefix="/avaliacao_pedidos", tags=["avaliacao_pedidos"])
+
+def recalcular_medias_produtos(db: Session, id_pedido: str):
+    """Recalcula as médias de avaliação dos produtos que estão neste pedido"""
+    items = db.query(ItemPedido).filter(ItemPedido.id_pedido == id_pedido).all()
+    for item in items:
+        calcular_media_avaliacoes_produto(db, item.id_produto)
 
 @route.post('/', response_model=AvaliacaoPedidoRead, status_code=status.HTTP_201_CREATED)
 def create_avaliacao_pedido(body: AvaliacaoPedidoCreate, db: Session = Depends(get_db)):
@@ -39,6 +45,13 @@ def create_avaliacao_pedido(body: AvaliacaoPedidoCreate, db: Session = Depends(g
     db.add(db_avaliacao_pedido)
     db.commit()
     db.refresh(db_avaliacao_pedido)
+    
+    # Recalcula a média de avaliações do pedido
+    calcular_media_avaliacoes(db, body.id_pedido)
+    
+    # Recalcula as médias de avaliações dos produtos
+    recalcular_medias_produtos(db, body.id_pedido)
+    
     return db_avaliacao_pedido
 
 @route.get('/', response_model=PaginatedResponse[AvaliacaoPedidoRead])
@@ -80,6 +93,12 @@ def update_avaliacao_pedido(id_avaliacao: str, body: AvaliacaoPedidoUpdate, db: 
 
     db.commit()
     db.refresh(avaliacao_pedido)
+
+    if body.avaliacao is not None:    
+        calcular_media_avaliacoes(db, avaliacao_pedido.id_pedido)
+        # Recalcula as médias de avaliações dos produtos
+        recalcular_medias_produtos(db, avaliacao_pedido.id_pedido)
+    
     return avaliacao_pedido
 
 @route.delete('/{id_avaliacao}', status_code=status.HTTP_204_NO_CONTENT)
@@ -88,5 +107,12 @@ def delete_avaliacao_pedido(id_avaliacao: str, db: Session = Depends(get_db)):
     if not avaliacao_pedido:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Avaliação do pedido não encontrada")
 
+    id_pedido = avaliacao_pedido.id_pedido
     db.delete(avaliacao_pedido)
     db.commit()
+    
+    # Recalcula a média de avaliações do pedido
+    calcular_media_avaliacoes(db, id_pedido)
+    
+    # Recalcula as médias de avaliações dos produtos
+    recalcular_medias_produtos(db, id_pedido)
